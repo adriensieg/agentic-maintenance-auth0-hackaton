@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Kitchen Assist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0d0d0d;
+      --surface: #161616;
+      --surface2: #1e1e1e;
+      --border: #2a2a2a;
+      --accent: #e8c547;
+      --accent2: #ff6b35;
+      --text: #f0ece0;
+      --text-dim: #6b6760;
+      --text-mid: #9e9a90;
+      --radius: 12px;
+      --success: #4caf6e;
+      --error: #e05a4e;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      height: -webkit-fill-available;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      /* Full-height flex column — works on desktop and mobile */
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+    }
+
+    /* ── Header ── */
+    header {
+      flex-shrink: 0;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      /* Safe area for notched phones */
+      padding-top: calc(14px + env(safe-area-inset-top));
+    }
+
+    .logo-mark {
+      width: 34px; height: 34px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-size: 17px;
+      flex-shrink: 0;
+    }
+
+    header h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .status-pill {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.65rem;
+      color: var(--text-mid);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 6px var(--success);
+      animation: pulse 2.5s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* ── Main layout ── */
+    main {
+      flex: 1;
+      min-height: 0;           /* allow children to shrink */
+      display: flex;
+      flex-direction: column;
+      /* Centre on desktop, full-width on mobile */
+      width: 100%;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 16px 16px 0;
+    }
+
+    /* ── Maintainer cards ── */
+    .maintainers-bar {
+      flex-shrink: 0;
+      display: grid;
+      /* 3 cols on desktop, auto-fit on mobile (min 140px per card) */
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .maintainer-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .maintainer-card .role {
+      font-size: 0.6rem;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    .maintainer-card .name {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .maintainer-card .specialty {
+      font-size: 0.6rem;
+      color: var(--text-dim);
+      line-height: 1.4;
+      margin-top: 2px;
+    }
+
+    /* ── Chat window ── */
+    #chat-window {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      scroll-behavior: smooth;
+    }
+
+    #chat-window::-webkit-scrollbar { width: 4px; }
+    #chat-window::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .msg {
+      display: flex;
+      flex-direction: column;
+      /* On mobile bubbles can go a bit wider */
+      max-width: 88%;
+      animation: fadeUp 0.25s ease;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .msg.crew  { align-self: flex-end;   align-items: flex-end; }
+    .msg.agent { align-self: flex-start; align-items: flex-start; }
+
+    .msg .label {
+      font-size: 0.58rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .msg.crew  .label { color: var(--accent); }
+    .msg.agent .label { color: var(--text-dim); }
+
+    .bubble {
+      padding: 10px 13px;
+      border-radius: 10px;
+      font-size: 0.82rem;
+      line-height: 1.55;
+    }
+
+    .msg.crew .bubble {
+      background: var(--accent);
+      color: #0d0d0d;
+      border-bottom-right-radius: 3px;
+    }
+
+    .msg.agent .bubble {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-bottom-left-radius: 3px;
+    }
+
+    /* ── Call notification ── */
+    .call-notice {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 107, 53, 0.1);
+      border: 1px solid var(--accent2);
+      border-radius: 8px;
+      padding: 10px 13px;
+      font-size: 0.72rem;
+      color: var(--accent2);
+      animation: fadeUp 0.3s ease;
+      align-self: center;
+      max-width: 100%;
+      word-break: break-all;
+    }
+
+    .call-notice .icon { font-size: 1rem; flex-shrink: 0; }
+
+    /* ── Typing indicator ── */
+    .typing-indicator {
+      display: flex; align-items: center; gap: 5px;
+      padding: 10px 13px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      width: fit-content;
+    }
+
+    .typing-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--text-dim);
+      animation: blink 1.2s ease-in-out infinite;
+    }
+
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes blink {
+      0%, 100% { opacity: 0.3; transform: scale(0.8); }
+      50%       { opacity: 1;   transform: scale(1); }
+    }
+
+    /* ── Input area ── */
+    .input-area {
+      flex-shrink: 0;
+      margin-top: 10px;
+      padding-bottom: calc(12px + env(safe-area-inset-bottom));
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+    }
+
+    #message-input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 16px;   /* 16px prevents iOS auto-zoom on focus */
+      outline: none;
+      transition: border-color 0.2s;
+      resize: none;
+      height: 48px;
+      overflow: hidden;
+      /* Smooth feel on iOS */
+      -webkit-appearance: none;
+    }
+
+    #message-input::placeholder { color: var(--text-dim); }
+    #message-input:focus { border-color: var(--accent); }
+
+    #send-btn {
+      background: var(--accent);
+      color: #0d0d0d;
+      border: none;
+      border-radius: var(--radius);
+      /* Touch-friendly minimum size */
+      min-width: 64px;
+      height: 48px;
+      padding: 0 18px;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      white-space: nowrap;
+      /* Remove tap highlight on mobile */
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    #send-btn:hover:not(:disabled)  { opacity: 0.85; }
+    #send-btn:active:not(:disabled) { transform: scale(0.97); }
+    #send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── Footer ── */
+    footer {
+      flex-shrink: 0;
+      padding: 12px 20px;
+      border-top: 1px solid var(--border);
+      font-size: 0.62rem;
+      color: var(--text-dim);
+      letter-spacing: 0.05em;
+      text-align: center;
+    }
+
+    /* ── Responsive tweaks ── */
+    @media (max-width: 480px) {
+      .maintainers-bar {
+        /* Stack into 1 column on very small screens */
+        grid-template-columns: 1fr;
+        gap: 6px;
+      }
+
+      .maintainer-card {
+        /* Horizontal layout on small screens to save vertical space */
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .maintainer-card .role  { flex-basis: 100%; }
+      .maintainer-card .name  { font-size: 0.78rem; }
+      .maintainer-card .specialty { display: none; } /* hide on tiny screens */
+    }
+
+    @media (min-width: 481px) and (max-width: 720px) {
+      .maintainers-bar {
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-mark">🍔</div>
+  <h1>Kitchen Assist</h1>
+  <div class="status-pill">
+    <span class="status-dot"></span>
+    Agent online
+  </div>
+</header>
+
+<main>
+  <!-- Maintainer roster -->
+  <div class="maintainers-bar">
+    {% for key, m in maintainers.items() %}
+    <div class="maintainer-card">
+      <span class="role">{{ key.replace("_", " ") }}</span>
+      <span class="name">{{ m.name }}</span>
+      <span class="specialty">{{ m.specialty }}</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Chat -->
+  <div id="chat-window">
+    <div class="msg agent">
+      <span class="label">Agent</span>
+      <div class="bubble">Hey! I'm your kitchen assistant. Tell me what's going on — a question, a procedure check, or a breakdown you need me to handle.</div>
+    </div>
+  </div>
+
+  <!-- Input -->
+  <div class="input-area">
+    <textarea id="message-input" placeholder="Type your message…" rows="1"></textarea>
+    <button id="send-btn">Send</button>
+  </div>
+</main>
+
+<footer>Restaurant AI Agent · Powered by Google Gemini &amp; Adrien SIEG</footer>
+
+<script>
+  const chatWindow = document.getElementById('chat-window');
+  const input = document.getElementById('message-input');
+  const sendBtn = document.getElementById('send-btn');
+  const SESSION_ID = 'crew-' + Math.random().toString(36).slice(2, 9);
+
+  function scrollToBottom() {
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+  }
+
+  function appendMessage(role, text) {
+    const wrapper = document.createElement('div');
+    wrapper.className = `msg ${role}`;
+    const label = document.createElement('span');
+    label.className = 'label';
+    label.textContent = role === 'crew' ? 'You' : 'Agent';
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.textContent = text;
+    wrapper.appendChild(label);
+    wrapper.appendChild(bubble);
+    chatWindow.appendChild(wrapper);
+    scrollToBottom();
+    return wrapper;
+  }
+
+  function showTyping() {
+    const wrap = document.createElement('div');
+    wrap.className = 'msg agent';
+    wrap.id = 'typing-wrap';
+    const label = document.createElement('span');
+    label.className = 'label';
+    label.textContent = 'Agent';
+    const ind = document.createElement('div');
+    ind.className = 'typing-indicator';
+    ind.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+    wrap.appendChild(label);
+    wrap.appendChild(ind);
+    chatWindow.appendChild(wrap);
+    scrollToBottom();
+  }
+
+  function removeTyping() {
+    const el = document.getElementById('typing-wrap');
+    if (el) el.remove();
+  }
+
+  function showCallNotice(info) {
+    const notice = document.createElement('div');
+    notice.className = 'call-notice';
+    notice.innerHTML = `<span class="icon">📞</span><span>Calling <strong>${info.maintainer_name}</strong> — CallSid: <code>${info.call_sid}</code></span>`;
+    chatWindow.appendChild(notice);
+    scrollToBottom();
+  }
+
+  async function sendMessage() {
+    const text = input.value.trim();
+    if (!text) return;
+
+    appendMessage('crew', text);
+    input.value = '';
+    sendBtn.disabled = true;
+    showTyping();
+
+    try {
+      const res = await fetch('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: SESSION_ID, message: text }),
+      });
+
+      const data = await res.json();
+      removeTyping();
+
+      if (!res.ok) {
+        appendMessage('agent', `⚠️ Error: ${data.detail || 'Something went wrong.'}`);
+      } else {
+        appendMessage('agent', data.reply);
+        if (data.call_placed && data.call_info) {
+          showCallNotice(data.call_info);
+        }
+      }
+    } catch (err) {
+      removeTyping();
+      appendMessage('agent', '⚠️ Network error. Please try again.');
+      console.error(err);
+    } finally {
+      sendBtn.disabled = false;
+      input.focus();
+    }
+  }
+
+  sendBtn.addEventListener('click', sendMessage);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  /* ── Mobile: keep chat above the soft keyboard ── */
+  if ('visualViewport' in window) {
+    window.visualViewport.addEventListener('resize', () => {
+      // Nudge the page height so the input stays visible above the keyboard
+      document.body.style.height = window.visualViewport.height + 'px';
+      scrollToBottom();
+    });
+  }
+</script>
+</body>
+</html>
