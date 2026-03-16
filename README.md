@@ -1,15 +1,15 @@
 # A multi-modal tech AI Agent
 
-A multimodal AI agent that detects and troubleshoots home issues, escalates to maintenance, books service appointments, make any payment and generates repair tickets—seamlessly integrated with your favorite AI Assistant such as ChatGPT, Claude or Mistral AI Le Chat. 
+A multimodal AI agent that detects and troubleshoots home issues, escalates to maintenance, books service appointments, make any payment and generates repair tickets —seamlessly integrated with your favorite AI Assistant such as ChatGPT, Claude or Mistral AI Le Chat. 
 
-It's a multi-party authorization problem on how to raise a ticket, contact a maintenair and payInside a 3rd party conversational AI interface.
+It's a **multi-party authorization problem** on how to raise a ticket in a 3rd party system, contact a maintenair and pay inside a 3rd party conversational AI interface.
 
-How do we enable AI assistants (such as Open AI ChatGPT, Mistral AI Le Chat or Anthropic Claude)to execute end‑to‑end agentic commerce on behalf of users — in real time and transparently — while preserving identity, consent, and trust across multiple providers?
+How do we enable **AI assistants** (such as *Open AI ChatGPT*, *Mistral AI Le Chat* or **Anthropic Claude*)to execute end‑to‑end actions **on behalf of users** — in **real time** and **transparently** — while **preserving identity**, **consent**, and **trust** across **multiple providers**?
 
 # The vision: 
-You wake up. Coffee. Breakfast. You load the dishwasher and press Start.
-Nothing happens.
+You wake up. Coffee. Breakfast. You load the dishwasher and press Start. Nothing happens.
 You open your favorite AI Assistant such as - ChatGPT, Claude or Mistral AI and explains the situation. 
+
 A multimodal AI agent instantly analyzes the issue—it detects the problem, diagnoses the issue, and creates a repair ticket automatically.
 It can call the technician on your behalf, explain the problem, share diagnostics, and book the service appointment.
 You don’t troubleshoot it. You don’t call anyone.
@@ -132,5 +132,4 @@ Le Chat connects to our OAuth-protected MCP server using discovery Dynamic Clien
 
 Capabilities
 Secure product discovery, contextual ordering, real-time negotiation, payment initiation via CIBA, and persistent user context — enabling end-to-end trusted Agentic Commerce.
-
 First - you need to make it available - here https://chat.mistral.ai/connections
