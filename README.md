@@ -4,7 +4,7 @@ A multimodal AI agent that detects and troubleshoots home issues, escalates to m
 
 It's a **multi-party authorization problem** on how to raise a ticket in a 3rd party system, contact a maintenair and pay inside a 3rd party conversational AI interface.
 
-How do we enable **AI assistants** (such as *Open AI ChatGPT*, *Mistral AI Le Chat* or **Anthropic Claude*)to execute end‑to‑end actions **on behalf of users** — in **real time** and **transparently** — while **preserving identity**, **consent**, and **trust** across **multiple providers**?
+How do we enable **AI assistants** (such as *Open AI ChatGPT*, *Mistral AI Le Chat* or *Anthropic Claude*)to execute end‑to‑end actions **on behalf of users** — in **real time** and **transparently** — while **preserving identity**, **consent**, and **trust** across **multiple providers**?
 
 # The vision: 
 You wake up. Coffee. Breakfast. You load the washing machine and press Start. Nothing happens.
