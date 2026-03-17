@@ -41,6 +41,54 @@ Within seconds it:
 
 # The Core Problem We're Solving
 
+A user saying "repair my washing machine" inside ChatGPT triggers a **3-party authorization chain**: 
+
+1. ChatGPT must prove its **application identity** to our MCP server (Boundary 1, solved via PKCE + Auth0-issued JWT),
+2. ...our MCP server must **resolve which human issued the command** and retrieve that **human's pre-authorized 3rd parties' API credentials** (identity gap, solved via RFC 8693 Token Exchange + Auth0 Token Vault),
+3. ...and before the actual mainteance intervention is booked, the **user must explicitly confirm the financial transaction** on a separate channel without leaving ChatGPT (confirmation gap, solved via CIBA).
+
+- **ChatGPT** can talk to **external services** through **MCP**.
+- **Uber** exposes **ride-booking** through an **OAuth-protected API**.
+- **Auth0** can **broker identity** and **credentials**.
+
+We need a mechanism that **bridges the ChatGPT session identity** to the **3rd parties account identity** without asking the user to **re-authenticate every time**. 
+
+~~This is exactly what **Identity Federation** and specifically **Token Exchange** (RFC 8693) solves. This is where **Identity Jag** (**Id-Jag**) or equivalent **cross-app identity** patterns come in.~~
+
+Each of these is a distinct protocol problem. None is automatically inherited from solving the others. **Auth0 is the architectural component that spans all three** — 
+- as **authorization server**,
+- **identity broker**,
+- **credential vault**,
+- and **confirmation orchestrator**
+
+... making it the single most critical dependency in the entire stack.
+
+| # | Problem | Protocol gap | Consequence if unsolved |
+|---|---|---|---|
+| 1 | ChatGPT is authenticated but the human user is not identified | OAuth 2.1 without OIDC carries no user identity | MCP server cannot map the request to a specific Uber account |
+| 2 | MCP server has no Uber credentials for the user | 3rd parties tokens are user-scoped, issued separately, must be stored and refreshed | Maintenace cannot be booked regardless of Boundary 1 being correctly configured |
+| 3 | Financial transaction requires explicit out-of-band user confirmation | Neither OAuth nor MCP provide a transaction confirmation primitive | Real money moves without verified user intent — compliance and fraud risk |
+
+### The problem statement
+
+#### Break 1 — ChatGPT is authenticated, but the user is not
+When ChatGPT connects to our MCP server, **OAuth 2.1 authenticates the ChatGPT application** — **not the human behind it**. 
+
+The access token your MCP server receives proves that **OpenAI's client is authorized to call our tools**. It carries **zero information** about which specific human issued the command.
+OpenAI's MCP integration uses OAuth 2.1 **without OpenID Connect**. No `ID token` is issued. No sub `claim`. No `user profile`. **The human is invisible at the protocol level**.
+Your MCP server receives a **legitimate**, **cryptographically valid token** — and has **no idea whose Uber account to charge**.
+
+#### Break 2 — our MCP server has no standing with Uber
+Even if you resolve the user's identity, your MCP server **cannot call Uber's API on their behalf without a user-scoped Uber OAuth token** — one that was issued specifically because that user went through Uber's own consent screen and explicitly authorized your application to book rides on their account.
+That token does not exist automatically. It must be obtained, stored securely, refreshed before expiry, and retrieved at request time — for every individual user, independently. 
+
+If it is missing, expired, or stored incorrectly, the ride cannot be booked regardless of how well Boundary 1 is configured.
+The Auth0 JWT from Boundary 1 and the Uber OAuth token from Boundary 2 are issued by different authorization servers, scoped to different resources, and govern completely different trust relationships. They cannot substitute for each other.
+
+#### Break 3 — A financial transaction requires explicit user confirmation
+Fare estimates and ETA lookups are low-risk reads. Actually booking a ride — triggering a real financial transaction against a real payment method — is a different category of action entirely. Silent background authorization is insufficient and, depending on jurisdiction, potentially non-compliant.
+The user must confirm the specific transaction, on a separate channel, in a way that is auditable and non-repudiable. This confirmation must happen without breaking the conversational flow inside ChatGPT and without requiring the user to open another app.
+
 # The solution
 You can try the Maintenance Agent out here - https://mistralai.devailab.work/mcp.
  
@@ -66,6 +114,31 @@ OpenAI chatgpt integrates with our **OAuth-protected MCP** server by performing 
 
 - Here is the explanation: https://youtu.be/qwtwGqpXluE
 
+```
+agentic-commerce/
+├── app.py
+└── library_mcp_auth/
+    ├── __init__.py
+    ├── config.py
+    ├── token.py
+    ├── middleware.py
+    └── routes.py
+├── library_mcp_ordering/
+    ├── __init__.py
+    ├── data.py
+    ├── filters.py
+    ├── handlers.py
+    ├── models.py
+    ├── server.py
+    └── widgets.py
+├── infrastructure/
+    ├── deployment.yaml
+    └── service.yaml
+├── Dockerfile
+├── requirements.txt
+└── README.md
+```
+
 # The Limits of Today, The Blueprint for Tomorrow
 
 #### OpenAI (or any AI assistant) does not expose user identity through the MCP layer.
@@ -84,3 +157,11 @@ In the OpenAI chatgpt SDK integration, **only OAuth 2.1 is used** — **not OIDC
 #### Most of 3rd parties API access requires business approval.
 External 3rd parties API are **not publicly open**. 
 Vendors must **explicitly grant our application access to perform actions on behalf of users**. This is a commercial and legal dependency — not a technical one. Without it, Boundary 2 cannot go to production regardless of how well everything else is built.
+
+# Agentic AI Takes Over Commerce - a payment problem
+
+- 🚗 Book the cheapest Uber or Lyft—right inside ChatGPT - https://www.youtube.com/shorts/5ZI7IgvJHV8
+- 💐 Send flowers instantly from your local nearby store inside Mistral AI Le Chat - https://youtu.be/671YMGWVHL0
+- 🍔 Order your favorite nearby burgers with Anthropic Claude - https://www.youtube.com/shorts/Cy-N7jy_BsQ
+
+<img width="80%" height="80%" alt="image" src="https://github.com/user-attachments/assets/fbf8a72a-7c4c-4fd8-9bdc-f210ada95072" />
