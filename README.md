@@ -14,6 +14,7 @@ This is **not** a **UX convenience story** - it's a **multi-party authorization 
 
 # The vision: 
 You wake up. Coffee. Breakfast. You load the washing machine and press Start. Nothing happens.
+
 You open your favorite AI Assistant such as - ChatGPT, Claude or Mistral AI and explains the situation. 
 
 A **multimodal AI agent** instantly analyzes the issue — it *detects the problem*, *diagnoses the issue*, and creates a *repair ticket automatically*.
