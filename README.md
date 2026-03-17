@@ -1,10 +1,16 @@
 # A multi-modal tech AI Agent
 
-A multimodal AI agent that detects and **troubleshoots home issues on your behalf**, **escalates to maintenance**, **books service appointments**, **make any payment** and **generates repair tickets** — seamlessly **integrated** with your **existing favorite AI Assistant** such as ChatGPT, Claude or Mistral AI Le Chat. 
-
-It's a **multi-party authorization problem** on how to **raise a ticket** in a 3rd party system, **contact a maintenair** and **pay inside a 3rd party conversational AI interface**.
+A multimodal AI agent that detects and **troubleshoots home issues on your behalf**, **escalates to maintenance**, **books service appointments**, **make any payment** and **generates repair tickets** — seamlessly **integrated** with your **existing favorite AI Assistant** such as ChatGPT, Claude or Mistral AI Le Chat. NO more apps. 
 
 How do we enable **AI assistants** (such as *Open AI ChatGPT*, *Mistral AI Le Chat* or *Anthropic Claude*) to execute end‑to‑end actions **on behalf of users** — in **real time** and **transparently** — while **preserving identity**, **consent**, and **trust** across **multiple providers**?
+
+Who **owns the transaction** when ChatGPT (or others) becomes the **interface** and **every app becomes a backend** — and how do we monetize that securely?
+
+This is **not** a **UX convenience story** - it's a **multi-party authorization problem**: connecting these 3 systems into a single seamless user action — "repair my Washing machine" — requires solving an **identity chain** that does not exist out of the box. The chain breaks in 3 specific places:
+
+Break 1 — **ChatGPT is authenticated** - via DCR and OAuth 2.1 Authorization Code Flow with PKCE - but **the user is not**.
+Break 2 — Our MCP server has **no standing** with **other 3rd party applications** - such as ServiceNow and 3rd party APIs.
+Break 3 — A **financial transaction** requires explicit **user confirmation**
 
 # The vision: 
 You wake up. Coffee. Breakfast. You load the washing machine and press Start. Nothing happens.
@@ -25,7 +31,6 @@ Within seconds it:
 - Books the earliest appointment
 - Sends diagnostics to the technician
 - Processes the payment if needed
-
 
 # The solution
 You can try the Maintenance Agent out here - https://mistralai.devailab.work/mcp.
