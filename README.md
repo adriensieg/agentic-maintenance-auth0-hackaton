@@ -164,4 +164,3 @@ Vendors must **explicitly grant our application access to perform actions on beh
 - 💐 Send flowers instantly from your local nearby store inside Mistral AI Le Chat - https://youtu.be/671YMGWVHL0
 - 🍔 Order your favorite nearby burgers with Anthropic Claude - https://www.youtube.com/shorts/Cy-N7jy_BsQ
 
-<img width="80%" height="80%" alt="image" src="https://github.com/user-attachments/assets/fbf8a72a-7c4c-4fd8-9bdc-f210ada95072" />
