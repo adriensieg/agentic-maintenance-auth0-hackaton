@@ -24,7 +24,10 @@ Your AI agent handles it — **seamlessly**, **silently**.
 It can even **approve payments** and track the repair.
 **All from the AI assistant you already use: ChatGPT, Claude or Le Chat**
 
-**No apps**. **No phone calls**. **No hassle**.
+**No apps**. **No phone calls**. **No hassle**.  **No switching**, **No friction**.
+- **ChatGPT** becomes the **interface**.
+- Any **3rd parties API or application** become the **backends**.
+- The **AI agent** **orchestrates** everything.
 
 Within seconds it:
 - Creates a repair ticket
@@ -32,12 +35,6 @@ Within seconds it:
 - Books the earliest appointment
 - Sends diagnostics to the technician
 - Processes the payment if needed
-
-- **ChatGPT** becomes the **interface**.
-- Any **3rd parties API or application** become the **backends**.
-- The **AI agent** **orchestrates** everything.
-
-**No apps**, **No switching**, **No friction**.
 
 # The Core Problem We're Solving
 
