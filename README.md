@@ -10,7 +10,7 @@ How do we enable **AI assistants** (such as *Open AI ChatGPT*, *Mistral AI Le Ch
 You wake up. Coffee. Breakfast. You load the washing machine and press Start. Nothing happens.
 You open your favorite AI Assistant such as - ChatGPT, Claude or Mistral AI and explains the situation. 
 
-A **multimodal AI agent** instantly analyzes the issue — it *detects the problem*, **diagnoses the issue*, and creates a *repair ticket automatically*.
+A **multimodal AI agent** instantly analyzes the issue — it *detects the problem*, *diagnoses the issue*, and creates a *repair ticket automatically*.
 It can **call the technician on your behalf**, explain the problem, share diagnostics, and **book the service appointment**.
 You don’t troubleshoot it. You don’t call anyone.
 Your AI agent handles it.
