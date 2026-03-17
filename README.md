@@ -8,9 +8,9 @@ Who **owns the transaction** when ChatGPT (or others) becomes the **interface** 
 
 This is **not** a **UX convenience story** - it's a **multi-party authorization problem**: connecting these 3 systems into a single seamless user action — "repair my Washing machine" — requires solving an **identity chain** that does not exist out of the box. The chain breaks in 3 specific places:
 
-Break 1 — **ChatGPT is authenticated** - via DCR and OAuth 2.1 Authorization Code Flow with PKCE - but **the user is not**.
-Break 2 — Our MCP server has **no standing** with **other 3rd party applications** - such as ServiceNow and 3rd party APIs.
-Break 3 — A **financial transaction** requires explicit **user confirmation**
+- Break 1 — **ChatGPT is authenticated** - via DCR and OAuth 2.1 Authorization Code Flow with PKCE - but **the user is not**.
+- Break 2 — Our MCP server has **no standing** with **other 3rd party applications** - such as ServiceNow and 3rd party APIs.
+- Break 3 — A **financial transaction** requires explicit **user confirmation**
 
 # The vision: 
 You wake up. Coffee. Breakfast. You load the washing machine and press Start. Nothing happens.
