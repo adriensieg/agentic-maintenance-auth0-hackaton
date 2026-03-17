@@ -1,6 +1,8 @@
 # A multi-modal tech AI Agent
 
-A multimodal AI agent that detects and **troubleshoots home issues on your behalf**, **escalates to maintenance**, **books service appointments**, **make any payment** and **generates repair tickets** — seamlessly **integrated** with your **existing favorite AI Assistant** such as ChatGPT, Claude or Mistral AI Le Chat. **No more apps**. 
+A multimodal AI agent that detects and **troubleshoots home issues on your behalf**, **escalates to maintenance**, **books service appointments**, **make any payment** and **generates repair tickets** — seamlessly **integrated** with your **existing favorite AI Assistant** such as ChatGPT, Claude or Mistral AI Le Chat. 
+
+**No more apps**. **All from the AI assistant you already use: ChatGPT, Claude or Le Chat**
 
 The main security question is then how do we enable **AI assistants** (such as *Open AI ChatGPT*, *Mistral AI Le Chat* or *Anthropic Claude*) to execute end‑to‑end actions **on behalf of users** — in **real time** and **transparently** — while **preserving identity**, **consent**, and **trust** across **multiple providers**?
 
@@ -22,7 +24,6 @@ It can **call the technician on your behalf**, explain the problem, share diagno
 You don’t troubleshoot it. You don’t call anyone.
 Your AI agent handles it — **seamlessly**, **silently**. 
 It can even **approve payments** and track the repair.
-**All from the AI assistant you already use: ChatGPT, Claude or Le Chat**
 
 **No apps**. **No phone calls**. **No hassle**.  **No switching**, **No friction**.
 - **ChatGPT** becomes the **interface**.
