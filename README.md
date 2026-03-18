@@ -76,16 +76,20 @@ The access token your MCP server receives proves that **OpenAI's client is autho
 OpenAI's MCP integration uses OAuth 2.1 **without OpenID Connect**. No `ID token` is issued. No sub `claim`. No `user profile`. **The human is invisible at the protocol level**.
 Your MCP server receives a **legitimate**, **cryptographically valid token** — and has **no idea whose Uber account to charge**.
 
-#### Break 2 — our MCP server has no standing with Uber
-Even if you resolve the user's identity, your MCP server **cannot call Uber's API on their behalf without a user-scoped Uber OAuth token** — one that was issued specifically because that user went through Uber's own consent screen and explicitly authorized your application to book rides on their account.
-That token does not exist automatically. It must be obtained, stored securely, refreshed before expiry, and retrieved at request time — for every individual user, independently. 
+### Break 2 — Our MCP server cannot act on external APIs without user-specific authorization
 
-If it is missing, expired, or stored incorrectly, the ride cannot be booked regardless of how well Boundary 1 is configured.
-The Auth0 JWT from Boundary 1 and the Uber OAuth token from Boundary 2 are issued by different authorization servers, scoped to different resources, and govern completely different trust relationships. They cannot substitute for each other.
+Even if a user's identity is resolved, our MCP server cannot perform actions on an external service on the user's behalf without a user-specific access token — one explicitly issued after the user has gone through that service’s consent flow and granted permission for your application to act on their account.
 
-#### Break 3 — A financial transaction requires explicit user confirmation
-Fare estimates and ETA lookups are low-risk reads. Actually booking a ride — triggering a real financial transaction against a real payment method — is a different category of action entirely. Silent background authorization is insufficient and, depending on jurisdiction, potentially non-compliant.
-The user must confirm the specific transaction, on a separate channel, in a way that is auditable and non-repudiable. This confirmation must happen without breaking the conversational flow inside ChatGPT and without requiring the user to open another app.
+These tokens are not automatically available. They must be obtained per user, stored securely, refreshed before expiration, and retrieved at the moment of request.
+
+If the token is missing, expired, or handled incorrectly, the action cannot be completed, no matter how well internal identity or authentication boundaries are configured.
+Tokens issued by different authorization servers are scoped to different resources and govern distinct trust relationships. They are not interchangeable.
+
+### Break 3 — Financial transactions require explicit user confirmation
+
+Low-risk queries like reading estimates or checking availability can often be done without user interaction. Performing actions that trigger real financial transactions, however, is fundamentally different. Background authorization is insufficient and may be legally non-compliant in certain jurisdictions.
+
+The user must explicitly confirm each transaction, through a separate, auditable, and non-repudiable channel. This confirmation should occur without breaking the conversational flow or requiring the user to leave the interface.
 
 # The solution
 You can try the Maintenance Agent out here - https://mistralai.devailab.work/mcp.
