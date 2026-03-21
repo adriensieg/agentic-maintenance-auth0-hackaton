@@ -160,9 +160,3 @@ In the OpenAI chatgpt SDK integration, **only OAuth 2.1 is used** — **not OIDC
 External 3rd parties API are **not publicly open**. 
 Vendors must **explicitly grant our application access to perform actions on behalf of users**. This is a commercial and legal dependency — not a technical one. Without it, Boundary 2 cannot go to production regardless of how well everything else is built.
 
-# Agentic AI Takes Over Commerce - a payment problem
-
-- 🚗 Book the cheapest Uber or Lyft—right inside ChatGPT - https://www.youtube.com/shorts/5ZI7IgvJHV8
-- 💐 Send flowers instantly from your local nearby store inside Mistral AI Le Chat - https://youtu.be/671YMGWVHL0
-- 🍔 Order your favorite nearby burgers with Anthropic Claude - https://www.youtube.com/shorts/Cy-N7jy_BsQ
-
