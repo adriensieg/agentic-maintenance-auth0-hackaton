@@ -110,7 +110,7 @@ Auth0 is the security backbone of our multimodal AI agent, allowing assistants l
 
 
 
-# AI Repair Journey — Auth0 Security Edition (Short Sentences)
+# AI Repair Journey — Auth0 Security Edition 
 
 1. The user says the washing machine is broken.
 2. The AI loads only their machine data using **ReBAC** (**Relationship-Based Access Control**).
