@@ -106,6 +106,37 @@ Auth0 is the security backbone of our multimodal AI agent, allowing assistants l
 8. For high-risk actions like *booking maintenance* or *charging a payment method*, we trigger **CIBA** (Client-Initiated Backchannel Authentication) to send a secure push approval to the user’s phone.
 9. With **Auth0 managing identity**, **delegated authorization**, **token lifecycle**, and **out-of-band transaction confirmation**, the AI agent can safely complete end-to-end home repair workflows directly from the user’s AI assistant.
 
+
+
+
+
+# AI Repair Journey — Auth0 Security Edition (Short Sentences)
+
+1. The user says the washing machine is broken.
+2. The AI loads only their machine data using **ReBAC** (**Relationship-Based Access Control**).
+3. It checks the **user identity** with **Auth0 authentication**.
+4. The AI asks questions to understand the problem.
+5. The user uploads a photo; access is verified using **token-based permissions**.
+6. The AI identifies the faulty part.
+7. It contacts external technician APIs using a **secure Token Vault**.
+8. The AI fetches available technicians, secured with **dynamic client credentials**.
+9. The user selects a technician.
+10. The AI confirms the selection using **DCR** (**Dynamic Client Registration**).
+11. A repair appointment is booked through a **client-initiated backchannel authentication (CIBA)** flow.
+12. A service ticket is created in the system with **auditable logs**.
+13. The AI updates the user’s calendar with **scoped access tokens**.
+14. It checks if the machine is under warranty using secure **3rd-party API tokens**.
+15. The AI shows the repair cost to the user.
+16. The user approves **payment via CIBA backchannel flow**.
+17. A **one-time code** is sent via **MFA/SMS** for verification.
+18. The user enters the code to **confirm payment**.
+19. The AI verifies the **CIBA token with Auth0**.
+20. Payment is processed securely using **tokenized payment credentials**.
+21. All actions are logged for **auditing** and **traceability**.
+22. Access tokens expire after use to prevent leaks (**token lifecycle management**).
+23. The AI confirms the repair is **booked** and **paid**.
+
+
 # What has it been developed for this hackaton? 
 
 ### Solution 1 — ChatGPT is authenticated with any AI Assistant
