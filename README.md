@@ -2,7 +2,10 @@
 
 A multimodal AI agent that detects and **troubleshoots home issues on your behalf**, **escalates to maintenance**, **books service appointments**, **make any payment** and **generates repair tickets** — seamlessly **integrated** with your **existing favorite AI Assistant** such as ChatGPT, Claude or Mistral AI Le Chat. 
 
-- Here is the demo: https://www.youtube.com/watch?v=Kjp29AaKjts
+- Here is the demo of the multimodal AI agent: **https://www.youtube.com/watch?v=Kjp29AaKjts**
+- You can try it out here: **https://techie.devailab.work/mcp** but you must (**1**) connect to your AI assistant (ChatGPT, Claude, or Mistral AI Le Chat) and (**2**) be authenticated.
+  
+To make it connect to your existing AI Assitant - you can follow this tutorial: **https://www.youtube.com/watch?v=qwtwGqpXluE&feature=youtu.be**
 
 **No more apps**. **All from the AI assistant you already use**: ChatGPT, Claude or Le Chat.
 
@@ -133,14 +136,6 @@ washfix/
 ```
 ## Auth0 Flows Implemented
 
-# Auth0 Flows Implemented
-
-This document summarizes the authentication and authorization flows currently implemented in the application, including where each flow is defined and its purpose.
-
----
-
-## Overview
-
 | Flow | Location | Purpose |
 |------|----------|---------|
 | **JWT / JWKS verification** | `auth/middleware.py` | Verifies every API request using signed JWTs and JWKS validation |
@@ -151,8 +146,6 @@ This document summarizes the authentication and authorization flows currently im
 | **MFA / OTP** | `auth/mfa.py` | Sends SMS one-time passcodes for payment confirmation |
 | **Scoped Access Tokens** | `services/calendar_service.py` | Requests minimal Google Calendar permissions based on least-privilege access |
 | **Token Lifecycle / Expiry** | `auth/token_vault.py` | Invalidates tokens after single use or expiration |
-
----
 
 ## Flow Details
 
@@ -170,7 +163,6 @@ Used to validate incoming bearer tokens on every protected API request.
 **Why it matters:**  
 This is the first line of defense for API security and ensures only trusted, signed tokens are accepted.
 
----
 
 ### 2. ReBAC (Fine-Grained Authorization)
 **File:** `auth/rebac.py`
@@ -185,8 +177,6 @@ Implements relationship-based access control (ReBAC), likely backed by FGA (Fine
 **Why it matters:**  
 Authentication proves *who* the user is; ReBAC determines *what* they are allowed to access.
 
----
-
 ### 3. Token Vault
 **File:** `auth/token_vault.py`
 
@@ -199,8 +189,6 @@ Provides secure storage and retrieval of third-party OAuth tokens.
 
 **Why it matters:**  
 Centralizing token handling reduces accidental leakage and makes external API integrations safer and easier to manage.
-
----
 
 ### 4. Dynamic Client Registration (DCR)
 **File:** `auth/dcr.py`
@@ -215,8 +203,6 @@ Registers temporary or per-session OAuth clients for partner systems.
 **Why it matters:**  
 Useful when integrating with APIs that require dynamic onboarding or per-tenant/per-session OAuth registration.
 
----
-
 ### 5. CIBA (Client-Initiated Backchannel Authentication)
 **File:** `auth/ciba.py`
 
@@ -229,8 +215,6 @@ Implements out-of-band authorization flows for sensitive actions like payments o
 
 **Why it matters:**  
 CIBA is ideal when the user should confirm a high-risk action outside the current browser or app session.
-
----
 
 ### 6. MFA / OTP
 **File:** `auth/mfa.py`
@@ -249,8 +233,6 @@ Adds a second authentication factor using SMS one-time passcodes.
 **Why it matters:**  
 Provides an extra layer of user verification for high-risk transactions.
 
----
-
 ### 7. Scoped Access Tokens
 **File:** `services/calendar_service.py`
 
@@ -263,8 +245,6 @@ Uses OAuth access tokens with the smallest required permission set.
 
 **Why it matters:**  
 Restricting scopes improves user trust and reduces blast radius if a token is compromised.
-
----
 
 ### 8. Token Lifecycle / Expiry
 **File:** `auth/token_vault.py`
@@ -280,68 +260,20 @@ Enforces expiration and one-time-use rules for sensitive tokens.
 **Why it matters:**  
 Short-lived and single-use tokens significantly reduce risk in payment, booking, and delegated access flows.
 
----
+# Bonus Blog Post - Agentic AI That Actually Gets Work Done
 
-## Security Design Principles Reflected
+Most AI today is still trapped in the chat window. It can answer, summarize, and recommend — but it rarely **completes** real-world tasks. We’re building the next layer: **AI that can securely take action across fragmented systems and deliver outcomes, not just conversation**.
 
-These implementations align with several core security principles:
+In this demo, a user reports a broken washing machine. From that single prompt, the AI verifies identity through Auth0, retrieves only the user’s authorized appliance data using fine-grained access controls, asks diagnostic questions, analyzes an uploaded image, identifies the likely failed component, finds an available certified technician, books the repair, creates a service ticket, updates the user’s calendar, checks warranty status, and securely completes payment authorization.
 
-- **Least Privilege** — Minimal scopes and narrowly scoped access
-- **Defense in Depth** — JWT validation, MFA, ReBAC, and token lifecycle protections
-- **Ephemeral Trust** — Temporary credentials and dynamic registration where possible
-- **Separation of Concerns** — Auth logic is isolated into dedicated modules
-- **Replay Resistance** — Single-use or expiring tokens reduce abuse risk
+What looks like a simple consumer experience is actually a **trust and orchestration platform** underneath.
 
----
+The system is built with **ReBAC authorization, secure token vaulting, dynamic client registration, CIBA backchannel authentication, MFA confirmation, scoped access tokens, auditable workflows, and strict token lifecycle controls**. This gives AI the ability to act across third-party APIs and transactional systems **without compromising identity, permissions, or user trust**.
 
-## Suggested Architecture Grouping
+The market opportunity extends far beyond appliance repair. The same architecture can power **home services, healthcare, travel, insurance, financial operations, and enterprise support** — any category where users want problems solved, not just explained.
 
-For readability, these flows can be grouped into the following categories:
+The real opportunity isn’t another chatbot.  
+It’s building the **trusted execution layer for the agent economy**.
 
-### Authentication
-- JWT / JWKS verification
-- MFA / OTP
-- CIBA
-
-### Authorization
-- ReBAC (FGA)
-- Scoped access tokens
-
-### Token & OAuth Infrastructure
-- Token Vault
-- DCR
-- Token lifecycle / expiry
-
----
-
-## Recommended Next Additions (Optional)
-
-Potential future improvements:
-
-- **Audit logging** for auth decisions and token events
-- **Refresh token rotation**
-- **Device binding** for high-risk approvals
-- **Webhook-based CIBA completion**
-- **Admin visibility dashboard** for token usage and auth flows
-
----
-
-## File Map
-
-```text
-auth/
-├── middleware.py      # JWT / JWKS verification
-├── rebac.py           # Fine-grained authorization (ReBAC / FGA)
-├── token_vault.py     # Token storage, retrieval, expiry, invalidation
-├── dcr.py             # Dynamic Client Registration
-├── ciba.py            # Backchannel auth flows
-└── mfa.py             # SMS OTP / MFA
-
-services/
-└── calendar_service.py # Google Calendar scoped token usage
-
-Each of these is a distinct protocol problem. None is automatically inherited from solving the others. **Auth0 is the architectural component that spans all three** — 
-- as **authorization server**,
-- **identity broker**,
-- **credential vault**,
-- and **confirmation orchestrator**
+We’re not just making AI more helpful.  
+We’re making it **operational**.
