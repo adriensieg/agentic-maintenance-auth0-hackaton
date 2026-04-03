@@ -2,6 +2,8 @@
 
 A multimodal AI agent that detects and **troubleshoots home issues on your behalf**, **escalates to maintenance**, **books service appointments**, **make any payment** and **generates repair tickets** — seamlessly **integrated** with your **existing favorite AI Assistant** such as ChatGPT, Claude or Mistral AI Le Chat. 
 
+- Here is the demo: https://www.youtube.com/watch?v=Kjp29AaKjts
+
 **No more apps**. **All from the AI assistant you already use**: ChatGPT, Claude or Le Chat.
 
 The main security question is then how do we enable **AI assistants** (such as *Open AI ChatGPT*, *Mistral AI Le Chat* or *Anthropic Claude*) to execute end‑to‑end actions **on behalf of users** — in **real time** and **transparently** — while **preserving identity**, **consent**, and **trust** across **multiple providers**?
@@ -10,12 +12,17 @@ Who **owns the transaction** when ChatGPT (or others) becomes the **interface** 
 
 This is **not** a **UX convenience story** - it's a **multi-party authorization problem**: connecting these 3 systems into a single seamless user action — "repair my Washing machine" — requires solving an **identity chain** that does not exist out of the box. The chain breaks in 3 specific places:
 
-- Break 1 — **ChatGPT is authenticated** - via DCR and OAuth 2.1 Authorization Code Flow with PKCE - but **the user is not**.
-- Break 2 — Our MCP server has **no standing** with **other 3rd party applications** - such as ServiceNow and 3rd party APIs.
-- Break 3 — A **financial transaction** requires explicit **user confirmation**
-
 # The vision: 
 You wake up. Coffee. Breakfast. You load the washing machine and press Start. Nothing happens.
+The situation:
+- You’re renting a condo.
+- Your washing machine breaks.
+
+You **don’t want** to:
+- download another app
+- chase your landlord
+- call repair companies
+- pay first and deal with admin later
 
 You open your favorite AI Assistant such as - ChatGPT, Claude or Mistral AI and explains the situation. 
 
@@ -37,80 +44,7 @@ Within seconds it:
 - Sends diagnostics to the technician
 - Processes the payment if needed
 
-# The Core Problem We're Solving
-
-A user saying "repair my washing machine" inside ChatGPT triggers a **3-party authorization chain**: 
-
-1. ChatGPT must prove its **application identity** to our MCP server (Boundary 1, solved via PKCE + Auth0-issued JWT),
-2. ...our MCP server must **resolve which human issued the command** and retrieve that **human's pre-authorized 3rd parties' API credentials** (identity gap, solved via RFC 8693 Token Exchange + Auth0 Token Vault),
-3. ...and before the actual mainteance intervention is booked, the **user must explicitly confirm the financial transaction** on a separate channel without leaving ChatGPT (confirmation gap, solved via CIBA).
-
-- **ChatGPT** can talk to **external services** through **MCP**.
-- **Uber** exposes **ride-booking** through an **OAuth-protected API**.
-- **Auth0** can **broker identity** and **credentials**.
-
-We need a mechanism that **bridges the ChatGPT session identity** to the **3rd parties account identity** without asking the user to **re-authenticate every time**. 
-
-~~This is exactly what **Identity Federation** and specifically **Token Exchange** (RFC 8693) solves. This is where **Identity Jag** (**Id-Jag**) or equivalent **cross-app identity** patterns come in.~~
-
-Each of these is a distinct protocol problem. None is automatically inherited from solving the others. **Auth0 is the architectural component that spans all three** — 
-- as **authorization server**,
-- **identity broker**,
-- **credential vault**,
-- and **confirmation orchestrator**
-
-... making it the single most critical dependency in the entire stack.
-
-| # | Problem | Protocol gap | Consequence if unsolved |
-|---|---|---|---|
-| 1 | ChatGPT is authenticated but the human user is not identified | OAuth 2.1 without OIDC carries no user identity | MCP server cannot map the request to a specific Uber account |
-| 2 | MCP server has no Uber credentials for the user | 3rd parties tokens are user-scoped, issued separately, must be stored and refreshed | Maintenace cannot be booked regardless of Boundary 1 being correctly configured |
-| 3 | Financial transaction requires explicit out-of-band user confirmation | Neither OAuth nor MCP provide a transaction confirmation primitive | Real money moves without verified user intent — compliance and fraud risk |
-
-### The problem statement
-
-#### Break 1 — ChatGPT is authenticated, but the user is not
-When ChatGPT connects to our MCP server, **OAuth 2.1 authenticates the ChatGPT application** — **not the human behind it**. 
-
-The access token your MCP server receives proves that **OpenAI's client is authorized to call our tools**. It carries **zero information** about which specific human issued the command.
-OpenAI's MCP integration uses OAuth 2.1 **without OpenID Connect**. No `ID token` is issued. No sub `claim`. No `user profile`. **The human is invisible at the protocol level**.
-Your MCP server receives a **legitimate**, **cryptographically valid token** — and has **no idea whose Uber account to charge**.
-
-### Break 2 — Our MCP server cannot act on external APIs without user-specific authorization
-
-Even if a user's identity is resolved, our MCP server cannot perform actions on an external service on the user's behalf without a user-specific access token — one explicitly issued after the user has gone through that service’s consent flow and granted permission for your application to act on their account.
-
-These tokens are not automatically available. They must be obtained per user, stored securely, refreshed before expiration, and retrieved at the moment of request.
-
-If the token is missing, expired, or handled incorrectly, the action cannot be completed, no matter how well internal identity or authentication boundaries are configured.
-Tokens issued by different authorization servers are scoped to different resources and govern distinct trust relationships. They are not interchangeable.
-
-### Break 3 — Financial transactions require explicit user confirmation
-
-Low-risk queries like reading estimates or checking availability can often be done without user interaction. Performing actions that trigger real financial transactions, however, is fundamentally different. Background authorization is insufficient and may be legally non-compliant in certain jurisdictions.
-
-The user must explicitly confirm each transaction, through a separate, auditable, and non-repudiable channel. This confirmation should occur without breaking the conversational flow or requiring the user to leave the interface.
-
-# The solution
-You can try the Maintenance Agent out here - https://mistralai.devailab.work/mcp.
- 
-Auth0 is the security backbone of our multimodal AI agent, allowing assistants like ChatGPT, Claude, and Le Chat to safely act on behalf of the user.
-
-1. When the assistant connects, it automatically registers through **Auth0 DCR** and authenticates using the **OAuth 2.1 Authorization Code Flow with PKCE**.
-2. Auth0 then issues a **signed JWT access token**, representing the **authenticated user session**.
-3. Our MCP server verifies every request using **Auth0’s JWKS**, enforcing **scopes** and **permissions** before any tool can run.
-4. **Refresh tokens** keep the session secure and continuous while the AI agent works in the background.
-5. To link the **assistant session to the real user**, Auth0 performs **OAuth Token Exchange** (**RFC 8693**) to generate a **user-identity-bearing token**.
-6. This allows the AI agent to securely *create repair tickets*, *contact technicians*, and *book appointment** through our **OAuth-protected MCP tools**.
-7. When external services are needed, **Auth0’s Token Vault** stores and automatically refreshes **per-user third-party OAuth tokens**, retrieved only on demand.
-8. For high-risk actions like *booking maintenance* or *charging a payment method*, we trigger **CIBA** (Client-Initiated Backchannel Authentication) to send a secure push approval to the user’s phone.
-9. With **Auth0 managing identity**, **delegated authorization**, **token lifecycle**, and **out-of-band transaction confirmation**, the AI agent can safely complete end-to-end home repair workflows directly from the user’s AI assistant.
-
-
-
-
-
-# AI Repair Journey — Auth0 Security Edition 
+# What has it been developed for this hackaton?
 
 1. The user says the washing machine is broken.
 2. The AI loads only their machine data using **ReBAC** (**Relationship-Based Access Control**).
@@ -136,58 +70,278 @@ Auth0 is the security backbone of our multimodal AI agent, allowing assistants l
 22. Access tokens expire after use to prevent leaks (**token lifecycle management**).
 23. The AI confirms the repair is **booked** and **paid**.
 
+Full-stack Python implementation of the agentic AI demo with Auth0-backed security,
+Jira ticketing, CIBA payment flows, MFA/SMS verification, and Twilio voice calls.
 
-# What has it been developed for this hackaton? 
-
-### Solution 1 — ChatGPT is authenticated with any AI Assistant
-
-The **AI assistant SDK** - known as **connectors** lets developers bring their **own products** directly into AI Assistant interface with **custom Ul components**, **API access**, and **user context** that can **persist** across chats. It's built on Model Context Protocol (**MCP**), which defines how ChatGPT communicates with our app through **tools**, **resources**, and **structured data**.
-
-OpenAI chatgpt integrates with our **OAuth-protected MCP** server by performing **resource** and **authorization server discovery**, **dynamic client registration** (**DCR**), and a **PKCE-based authorization code flow** with **Auth0** to obtain a **JWT access token**, which our server verifies via **JWKS public keys** before allowing **SSE-based MCP tool execution** and seamless **token refresh** for ongoing secure access.
-
-- Here is the explanation: https://youtu.be/qwtwGqpXluE
-
+### Architecture Overview
 ```
-agentic-commerce/
-├── app.py
-└── library_mcp_auth/
-    ├── __init__.py
-    ├── config.py
-    ├── token.py
-    ├── middleware.py
-    └── routes.py
-├── library_mcp_ordering/
-    ├── __init__.py
-    ├── data.py
-    ├── filters.py
-    ├── handlers.py
-    ├── models.py
-    ├── server.py
-    └── widgets.py
-├── infrastructure/
-    ├── deployment.yaml
-    └── service.yaml
-├── Dockerfile
-├── requirements.txt
-└── README.md
+washfix/
+├── auth/               # All Auth0 / identity flows
+│   ├── auth0_client.py     — Management API client, token exchange
+│   ├── ciba.py             — CIBA backchannel authentication
+│   ├── dcr.py              — Dynamic Client Registration
+│   ├── mfa.py              — MFA / OTP / SMS dispatch
+│   ├── rebac.py            — Relationship-Based Access Control
+│   ├── token_vault.py      — Secure third-party token storage
+│   └── middleware.py       — JWT / Bearer middleware (FastAPI)
+│
+├── services/           # External integrations
+│   ├── jira_service.py     — Jira ticket creation & updates
+│   ├── technician_service.py — Technician lookup & availability
+│   ├── calendar_service.py — Google Calendar scoped-token updates
+│   ├── warranty_service.py — Samsung warranty registry check
+│   ├── payment_service.py  — Stripe Connect tokenized payment
+│   ├── sms_service.py      — Twilio SMS one-time codes
+│   └── voice_service.py    — Twilio outbound voice calls + WebSocket
+│
+├── core/               # Business logic / orchestration
+│   ├── agent.py            — Main AI agent loop (Claude / Gemini)
+│   ├── diagnosis.py        — Fault code analysis & part lookup
+│   ├── audit_log.py        — Immutable audit trail (structlog)
+│   └── session.py          — Per-user session state management
+│
+├── api/                # FastAPI routers
+│   ├── chat.py             — /api/chat  (WebSocket + REST)
+│   ├── photo.py            — /api/photo (upload + vision analysis)
+│   ├── booking.py          — /api/booking (appointment + calendar)
+│   ├── payment.py          — /api/payment (CIBA + MFA + Stripe)
+│   └── webhooks.py         — /api/webhooks (Twilio, Auth0 events)
+│
+├── models/             # Pydantic data models
+│   ├── session.py
+│   ├── technician.py
+│   ├── ticket.py
+│   └── payment.py
+│
+├── workers/            # Background / async workers
+│   ├── token_refresh.py    — Proactive token rotation
+│   └── audit_flush.py      — Periodic log flush to cold storage
+│
+├── utils/
+│   ├── crypto.py           — AES-256 encryption helpers
+│   └── http.py             — Retry-aware httpx client factory
+│
+├── config/
+│   └── settings.py         — Pydantic-Settings (env vars, secrets)
+│
+├── templates/          — Jinja2 HTML for the demo UI
+│   └── index.html
+│
+├── main.py             — FastAPI app entry point
+├── .env.example        — All required env vars
+└── requirements.txt
 ```
+## Auth0 Flows Implemented
 
-# The Limits of Today, The Blueprint for Tomorrow
+# Auth0 Flows Implemented
 
-#### OpenAI (or any AI assistant) does not expose user identity through the MCP layer.
-**RFC 8693 Token Exchange** works only if Auth0 can resolve the incoming ChatGPT token to a known user. 
-Currently, **OpenAI does not pass verifiable user identity claims through the MCP connection**. 
-We can work around this — but it requires either **OpenAI adding OIDC support**, or **a separate user-linking** step during onboarding that correlates the **ChatGPT session** to our **internal user record**. Doable, but not clean.
+This document summarizes the authentication and authorization flows currently implemented in the application, including where each flow is defined and its purpose.
 
-- The **OAuth flow** authenticates **OpenAI chatgpt** (**the client**) to our **MCP service** (**the resource provider**). 
-- It does **NOT** **authenticate** or **identify the individual human** (OpenAI chatgpt's user) to us.
-- We **won’t receive any user identity info** unless OpenAI chatgpt explictly passes it.
-- OAuth by itself **does not identify a user**; it just **delegates authorization**.
+---
 
-In traditional web apps, we often combine **OAuth + OpenID Connect (OIDC)** to both **authenticate** and **authorize users**.
-In the OpenAI chatgpt SDK integration, **only OAuth 2.1 is used** — **not OIDC.** So there’s **no user identity payload** (**no ID token**, **no claims** about the user).
+## Overview
 
-#### Most of 3rd parties API access requires business approval.
-External 3rd parties API are **not publicly open**. 
-Vendors must **explicitly grant our application access to perform actions on behalf of users**. This is a commercial and legal dependency — not a technical one. Without it, Boundary 2 cannot go to production regardless of how well everything else is built.
+| Flow | Location | Purpose |
+|------|----------|---------|
+| **JWT / JWKS verification** | `auth/middleware.py` | Verifies every API request using signed JWTs and JWKS validation |
+| **ReBAC (FGA)** | `auth/rebac.py` | Ensures each user can only load appliance data they are authorized to access |
+| **Token Vault** | `auth/token_vault.py` | Securely stores and retrieves third-party refresh/access tokens |
+| **DCR (Dynamic Client Registration)** | `auth/dcr.py` | Registers ephemeral OAuth clients for partner APIs |
+| **CIBA** | `auth/ciba.py` | Handles out-of-band payment and booking authorization |
+| **MFA / OTP** | `auth/mfa.py` | Sends SMS one-time passcodes for payment confirmation |
+| **Scoped Access Tokens** | `services/calendar_service.py` | Requests minimal Google Calendar permissions based on least-privilege access |
+| **Token Lifecycle / Expiry** | `auth/token_vault.py` | Invalidates tokens after single use or expiration |
 
+---
+
+## Flow Details
+
+### 1. JWT / JWKS Verification
+**File:** `auth/middleware.py`
+
+Used to validate incoming bearer tokens on every protected API request.
+
+**Responsibilities:**
+- Extract JWT from the `Authorization` header
+- Verify token signature using JWKS
+- Validate issuer, audience, and expiration
+- Reject unauthorized or malformed requests
+
+**Why it matters:**  
+This is the first line of defense for API security and ensures only trusted, signed tokens are accepted.
+
+---
+
+### 2. ReBAC (Fine-Grained Authorization)
+**File:** `auth/rebac.py`
+
+Implements relationship-based access control (ReBAC), likely backed by FGA (Fine-Grained Authorization).
+
+**Responsibilities:**
+- Determine whether a user can access a specific appliance or resource
+- Enforce per-user data boundaries
+- Prevent cross-account or cross-tenant data leakage
+
+**Why it matters:**  
+Authentication proves *who* the user is; ReBAC determines *what* they are allowed to access.
+
+---
+
+### 3. Token Vault
+**File:** `auth/token_vault.py`
+
+Provides secure storage and retrieval of third-party OAuth tokens.
+
+**Responsibilities:**
+- Store refresh/access tokens for external providers
+- Retrieve tokens when calling partner APIs
+- Support secure token rotation and lifecycle enforcement
+
+**Why it matters:**  
+Centralizing token handling reduces accidental leakage and makes external API integrations safer and easier to manage.
+
+---
+
+### 4. Dynamic Client Registration (DCR)
+**File:** `auth/dcr.py`
+
+Registers temporary or per-session OAuth clients for partner systems.
+
+**Responsibilities:**
+- Dynamically register clients with partner APIs
+- Support ephemeral client credentials
+- Reduce manual client provisioning overhead
+
+**Why it matters:**  
+Useful when integrating with APIs that require dynamic onboarding or per-tenant/per-session OAuth registration.
+
+---
+
+### 5. CIBA (Client-Initiated Backchannel Authentication)
+**File:** `auth/ciba.py`
+
+Implements out-of-band authorization flows for sensitive actions like payments or bookings.
+
+**Responsibilities:**
+- Initiate a backchannel authentication request
+- Trigger user approval on a separate trusted device or channel
+- Poll or receive confirmation once the user approves
+
+**Why it matters:**  
+CIBA is ideal when the user should confirm a high-risk action outside the current browser or app session.
+
+---
+
+### 6. MFA / OTP
+**File:** `auth/mfa.py`
+
+Adds a second authentication factor using SMS one-time passcodes.
+
+**Responsibilities:**
+- Generate one-time passcodes
+- Deliver OTPs via SMS
+- Validate submitted codes during confirmation flows
+
+**Primary use case:**
+- Payment confirmation
+- Step-up authentication for sensitive actions
+
+**Why it matters:**  
+Provides an extra layer of user verification for high-risk transactions.
+
+---
+
+### 7. Scoped Access Tokens
+**File:** `services/calendar_service.py`
+
+Uses OAuth access tokens with the smallest required permission set.
+
+**Responsibilities:**
+- Request only the necessary Google Calendar scopes
+- Minimize exposure to unnecessary user data
+- Follow least-privilege access principles
+
+**Why it matters:**  
+Restricting scopes improves user trust and reduces blast radius if a token is compromised.
+
+---
+
+### 8. Token Lifecycle / Expiry
+**File:** `auth/token_vault.py`
+
+Enforces expiration and one-time-use rules for sensitive tokens.
+
+**Responsibilities:**
+- Invalidate tokens after use
+- Prevent replay attacks
+- Enforce TTL / expiry windows
+- Support revocation and cleanup
+
+**Why it matters:**  
+Short-lived and single-use tokens significantly reduce risk in payment, booking, and delegated access flows.
+
+---
+
+## Security Design Principles Reflected
+
+These implementations align with several core security principles:
+
+- **Least Privilege** — Minimal scopes and narrowly scoped access
+- **Defense in Depth** — JWT validation, MFA, ReBAC, and token lifecycle protections
+- **Ephemeral Trust** — Temporary credentials and dynamic registration where possible
+- **Separation of Concerns** — Auth logic is isolated into dedicated modules
+- **Replay Resistance** — Single-use or expiring tokens reduce abuse risk
+
+---
+
+## Suggested Architecture Grouping
+
+For readability, these flows can be grouped into the following categories:
+
+### Authentication
+- JWT / JWKS verification
+- MFA / OTP
+- CIBA
+
+### Authorization
+- ReBAC (FGA)
+- Scoped access tokens
+
+### Token & OAuth Infrastructure
+- Token Vault
+- DCR
+- Token lifecycle / expiry
+
+---
+
+## Recommended Next Additions (Optional)
+
+Potential future improvements:
+
+- **Audit logging** for auth decisions and token events
+- **Refresh token rotation**
+- **Device binding** for high-risk approvals
+- **Webhook-based CIBA completion**
+- **Admin visibility dashboard** for token usage and auth flows
+
+---
+
+## File Map
+
+```text
+auth/
+├── middleware.py      # JWT / JWKS verification
+├── rebac.py           # Fine-grained authorization (ReBAC / FGA)
+├── token_vault.py     # Token storage, retrieval, expiry, invalidation
+├── dcr.py             # Dynamic Client Registration
+├── ciba.py            # Backchannel auth flows
+└── mfa.py             # SMS OTP / MFA
+
+services/
+└── calendar_service.py # Google Calendar scoped token usage
+
+Each of these is a distinct protocol problem. None is automatically inherited from solving the others. **Auth0 is the architectural component that spans all three** — 
+- as **authorization server**,
+- **identity broker**,
+- **credential vault**,
+- and **confirmation orchestrator**
