@@ -2,7 +2,7 @@
 
 A multimodal AI agent that detects and **troubleshoots home issues on your behalf**, **escalates to maintenance**, **books service appointments**, **make any payment** and **generates repair tickets** — seamlessly **integrated** with your **existing favorite AI Assistant** such as ChatGPT, Claude or Mistral AI Le Chat. 
 
-- Here is the demo of the multimodal AI agent: **https://youtu.be/9E7nHyk0ApQ**
+- Here is the demo of the multimodal AI agent: **https://www.youtube.com/watch?v=9E7nHyk0ApQ**
 - You can try it out here: **https://techie.devailab.work/mcp** but you must (**1**) connect to your AI assistant (ChatGPT, Claude, or Mistral AI Le Chat) and (**2**) be authenticated.
   
 To make it connect to your existing AI Assitant - you can follow this tutorial: **https://www.youtube.com/watch?v=qwtwGqpXluE&feature=youtu.be**
