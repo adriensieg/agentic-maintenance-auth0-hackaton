@@ -9,13 +9,28 @@ To make it connect to your existing AI Assitant - you can follow this tutorial: 
 
 **No more apps**. **All from the AI assistant you already use**: ChatGPT, Claude or Le Chat.
 
+- [The Vision](https://github.com/adriensieg/agentic-maintenance-auth0-hackaton/blob/master/README.md#the-vision)
+- [What has it been developed for this hackaton?](https://github.com/adriensieg/agentic-maintenance-auth0-hackaton/blob/master/README.md#what-has-it-been-developed-for-this-hackaton)
+    - [Architecture Overview](https://github.com/adriensieg/agentic-maintenance-auth0-hackaton/blob/master/README.md#architecture-overview)
+    - [Auth0 Flows Implemented](https://github.com/adriensieg/agentic-maintenance-auth0-hackaton/blob/master/README.md#auth0-flows-implemented)
+    - [Flow Details](https://github.com/adriensieg/agentic-maintenance-auth0-hackaton/blob/master/README.md#flow-details)
+        - [JWT / JWKS Verification](https://github.com/adriensieg/agentic-maintenance-auth0-hackaton/blob/master/README.md#1-jwt--jwks-verification)
+        - [ReBAC (Fine-Grained Authorization)](https://github.com/adriensieg/agentic-maintenance-auth0-hackaton/blob/master/README.md#2-rebac-fine-grained-authorization)
+        - [Token Vault](https://github.com/adriensieg/agentic-maintenance-auth0-hackaton/blob/master/README.md#3-token-vault)
+        - [Dynamic Client Registration (DCR)](https://github.com/adriensieg/agentic-maintenance-auth0-hackaton/blob/master/README.md#4-dynamic-client-registration-dcr)
+        - [CIBA (Client-Initiated Backchannel Authentication)]()https://github.com/adriensieg/agentic-maintenance-auth0-hackaton/blob/master/README.md#5-ciba-client-initiated-backchannel-authentication
+        - [MFA / OTP](https://github.com/adriensieg/agentic-maintenance-auth0-hackaton/blob/master/README.md#6-mfa--otp)
+        - [Scoped Access Tokens](https://github.com/adriensieg/agentic-maintenance-auth0-hackaton/blob/master/README.md#7-scoped-access-tokens)
+        - [Token Lifecycle / Expiry](https://github.com/adriensieg/agentic-maintenance-auth0-hackaton/blob/master/README.md#8-token-lifecycle--expiry)
+- [Bonus Blog Post](https://github.com/adriensieg/agentic-maintenance-auth0-hackaton/blob/master/README.md#bonus-blog-post---agentic-ai-that-actually-gets-work-done)
+
 The main security question is then how do we enable **AI assistants** (such as *Open AI ChatGPT*, *Mistral AI Le Chat* or *Anthropic Claude*) to execute end‑to‑end actions **on behalf of users** — in **real time** and **transparently** — while **preserving identity**, **consent**, and **trust** across **multiple providers**?
 
 Who **owns the transaction** when ChatGPT (or others) becomes the **interface** and **every app becomes a backend** — and how do we monetize that securely?
 
 This is **not** a **UX convenience story** - it's a **multi-party authorization problem**: connecting these 3 systems into a single seamless user action — "repair my Washing machine" — requires solving an **identity chain** that does not exist out of the box.
 
-# The vision 
+# The vision
 You wake up. Coffee. Breakfast. You load the washing machine and press Start. Nothing happens.
 The situation:
 - You’re renting a condo.
@@ -134,7 +149,7 @@ washfix/
 ├── .env.example        — All required env vars
 └── requirements.txt
 ```
-### Auth0 Flows Implemented
+## Auth0 Flows Implemented
 
 | Flow | Location | Purpose |
 |------|----------|---------|
@@ -147,9 +162,9 @@ washfix/
 | **Scoped Access Tokens** | `services/calendar_service.py` | Requests minimal Google Calendar permissions based on least-privilege access |
 | **Token Lifecycle / Expiry** | `auth/token_vault.py` | Invalidates tokens after single use or expiration |
 
-### Flow Details
+## Flow Details
 
-#### 1. JWT / JWKS Verification
+### 1. JWT / JWKS Verification
 **File:** `auth/middleware.py`
 
 Used to validate incoming bearer tokens on every protected API request.
@@ -164,7 +179,7 @@ Used to validate incoming bearer tokens on every protected API request.
 This is the first line of defense for API security and ensures only trusted, signed tokens are accepted.
 
 
-#### 2. ReBAC (Fine-Grained Authorization)
+### 2. ReBAC (Fine-Grained Authorization)
 **File:** `auth/rebac.py`
 
 Implements relationship-based access control (ReBAC), likely backed by FGA (Fine-Grained Authorization).
@@ -177,7 +192,7 @@ Implements relationship-based access control (ReBAC), likely backed by FGA (Fine
 **Why it matters:**  
 Authentication proves *who* the user is; ReBAC determines *what* they are allowed to access.
 
-#### 3. Token Vault
+### 3. Token Vault
 **File:** `auth/token_vault.py`
 
 Provides secure storage and retrieval of third-party OAuth tokens.
@@ -190,7 +205,7 @@ Provides secure storage and retrieval of third-party OAuth tokens.
 **Why it matters:**  
 Centralizing token handling reduces accidental leakage and makes external API integrations safer and easier to manage.
 
-#### 4. Dynamic Client Registration (DCR)
+### 4. Dynamic Client Registration (DCR)
 **File:** `auth/dcr.py`
 
 Registers temporary or per-session OAuth clients for partner systems.
@@ -203,7 +218,7 @@ Registers temporary or per-session OAuth clients for partner systems.
 **Why it matters:**  
 Useful when integrating with APIs that require dynamic onboarding or per-tenant/per-session OAuth registration.
 
-#### 5. CIBA (Client-Initiated Backchannel Authentication)
+### 5. CIBA (Client-Initiated Backchannel Authentication)
 **File:** `auth/ciba.py`
 
 Implements out-of-band authorization flows for sensitive actions like payments or bookings.
@@ -216,7 +231,7 @@ Implements out-of-band authorization flows for sensitive actions like payments o
 **Why it matters:**  
 CIBA is ideal when the user should confirm a high-risk action outside the current browser or app session.
 
-#### 6. MFA / OTP
+### 6. MFA / OTP
 **File:** `auth/mfa.py`
 
 Adds a second authentication factor using SMS one-time passcodes.
@@ -233,7 +248,7 @@ Adds a second authentication factor using SMS one-time passcodes.
 **Why it matters:**  
 Provides an extra layer of user verification for high-risk transactions.
 
-#### 7. Scoped Access Tokens
+### 7. Scoped Access Tokens
 **File:** `services/calendar_service.py`
 
 Uses OAuth access tokens with the smallest required permission set.
@@ -246,7 +261,7 @@ Uses OAuth access tokens with the smallest required permission set.
 **Why it matters:**  
 Restricting scopes improves user trust and reduces blast radius if a token is compromised.
 
-#### 8. Token Lifecycle / Expiry
+### 8. Token Lifecycle / Expiry
 **File:** `auth/token_vault.py`
 
 Enforces expiration and one-time-use rules for sensitive tokens.
